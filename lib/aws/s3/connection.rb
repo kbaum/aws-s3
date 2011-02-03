@@ -148,14 +148,22 @@ module AWS
         
       module Management #:nodoc:
         def self.included(base)
-          base.cattr_accessor :connections
-          base.connections = {}
+          #base.cattr_accessor :connections
+          #base.connections = {}
           base.extend ClassMethods
         end
         
         # Manage the creation and destruction of connections for AWS::S3::Base and its subclasses. Connections are
         # created with establish_connection!.
         module ClassMethods
+          def connections
+            Thread.current[:aws_s3_connections_hash] ||= {}
+          end
+
+          def connections=(connections_hash)
+            Thread.current[:aws_s3_connections_hash] = connections_hash
+          end
+
           # Creates a new connection with which to make requests to the S3 servers for the calling class.
           #   
           #   AWS::S3::Base.establish_connection!(:access_key_id => '...', :secret_access_key => '...')
